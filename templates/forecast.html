@@ -52,7 +52,7 @@
         {% if start_forecast %}
             <h2>Прогноз для начальной точки:</h2>
             {% for day in start_forecast['DailyForecasts'] %}
-                <div class="result"> <!-- Используем div вместо p для более гибкой настройки -->
+                <div class="result">
                     <p style="margin: 2px 0;">Дата: {{ day['Date'][:10] }}</p>
                     <p style="margin: 2px 0;">Максимальная температура: {{ day['Temperature']['Maximum']['Value'] }}°C</p>
                     <p style="margin: 2px 0;">Минимальная температура: {{ day['Temperature']['Minimum']['Value'] }}°C</p>
@@ -65,7 +65,7 @@
         {% if end_forecast %}
             <h2>Прогноз для конечной точки:</h2>
             {% for day in end_forecast['DailyForecasts'] %}
-                <div class="result"> <!-- Используем div вместо p для более гибкой настройки -->
+                <div class="result">
                     <p style="margin: 2px 0;">Дата: {{ day['Date'][:10] }}</p>
                     <p style="margin: 2px 0;">Максимальная температура: {{ day['Temperature']['Maximum']['Value'] }}°C</p>
                     <p style="margin: 2px 0;">Минимальная температура: {{ day['Temperature']['Minimum']['Value'] }}°C</p>

@@ -11,9 +11,8 @@ CURRENT_CONDITIONS_URL = 'http://dataservice.accuweather.com/currentconditions/v
 
 # Функция для проверки, что введённое название состоит только из русских букв
 def is_russian_city_name(city_name):
-    # Используем регулярное выражение для проверки русского алфавита
     pattern = r"^[А-ЯЁа-яё\s-]+$"
-    return bool(re.match(pattern, city_name.strip()))  # Используем .strip() для удаления пробелов
+    return bool(re.match(pattern, city_name.strip()))
 
 # Функция для получения кода города по названию
 def get_city_code(city_name):
@@ -66,7 +65,7 @@ def check_bad_weather(forecast, current_conditions):
     precipitation = current_conditions[0].get('HasPrecipitation', False)
 
     weather_status = "Благоприятная погода на маршруте"
-    if temp < 0 or temp > 35 or wind_speed > 50 or precipitation:
+    if temp < 5 or temp > 30 or wind_speed > 40 or precipitation:
         weather_status = "Неблагоприятная погода на маршруте"
 
     return {
@@ -81,8 +80,8 @@ def check_bad_weather(forecast, current_conditions):
 def index():
     start_weather, end_weather, error = None, None, None
     if request.method == 'POST':
-        start_city = request.form['start_city']  # Получаем данные из формы
-        end_city = request.form['end_city']      # Получаем данные из формы
+        start_city = request.form['start_city']
+        end_city = request.form['end_city']
 
         # Проверяем, являются ли названия городов русскими
         if not is_russian_city_name(start_city) or not is_russian_city_name(end_city):
