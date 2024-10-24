@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-дневный прогноз погоды</title>
+    <style>
+        body {
+            background-image: url('/static/background.png');
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: auto; /* Изменено для автоматической подстройки высоты */
+            padding: 20px; /* Добавлено отступы для контейнера */
+        }
+        .result {
+            margin-top: 5px;
+            font-size: 18px;
+            line-height: 1.2; /* Уменьшен межстрочный интервал */
+        }
+        .error {
+            color: red;
+            font-size: 18px;
+            margin-bottom: 10px; /* Уменьшен отступ снизу для ошибки */
+        }
+        .btn {
+            margin-top: 10px; /* Увеличен отступ сверху для кнопки */
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background-color: #3498db;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>5-дневный прогноз погоды</h1>
+        <div class="error">
+            {% if error %}
+                <p>{{ error }}</p>
+            {% endif %}
+        </div>
+
+        {% if start_forecast %}
+            <h2>Прогноз для начальной точки:</h2>
+            {% for day in start_forecast['DailyForecasts'] %}
+                <div class="result"> <!-- Используем div вместо p для более гибкой настройки -->
+                    <p style="margin: 2px 0;">Дата: {{ day['Date'][:10] }}</p>
+                    <p style="margin: 2px 0;">Максимальная температура: {{ day['Temperature']['Maximum']['Value'] }}°C</p>
+                    <p style="margin: 2px 0;">Минимальная температура: {{ day['Temperature']['Minimum']['Value'] }}°C</p>
+                    <p style="margin: 2px 0;">Описание: {{ day['Day']['IconPhrase'] }}</p>
+                </div>
+                <hr>
+            {% endfor %}
+        {% endif %}
+
+        {% if end_forecast %}
+            <h2>Прогноз для конечной точки:</h2>
+            {% for day in end_forecast['DailyForecasts'] %}
+                <div class="result"> <!-- Используем div вместо p для более гибкой настройки -->
+                    <p style="margin: 2px 0;">Дата: {{ day['Date'][:10] }}</p>
+                    <p style="margin: 2px 0;">Максимальная температура: {{ day['Temperature']['Maximum']['Value'] }}°C</p>
+                    <p style="margin: 2px 0;">Минимальная температура: {{ day['Temperature']['Minimum']['Value'] }}°C</p>
+                    <p style="margin: 2px 0;">Описание: {{ day['Day']['IconPhrase'] }}</p>
+                </div>
+                <hr>
+            {% endfor %}
+        {% endif %}
+        <button onclick="window.history.back();" class="btn">Назад</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогноз погоды</title>
+    <style>
+        body {
+            background-image: url('/static/background.png');
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 94vh;
+        }
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input-field label {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .input-field input {
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            width: 250px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background-color: #3498db;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .error {
+            color: red;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form method="POST">
+            <div class="input-field">
+                <label for="start_city">Начальная точка</label>
+                <input type="text" id="start_city" name="start_city" placeholder="Введите город" required>
+            </div>
+            <div class="input-field">
+                <label for="end_city">Конечная точка</label>
+                <input type="text" id="end_city" name="end_city" placeholder="Введите город" required>
+            </div>
+            <button type="submit" class="btn">Погода сейчас</button>
+            <button type="button" class="btn" onclick="submitForecastForm();">Прогноз погоды</button>
+        </form>
+
+        <div class="result">
+            {% if start_weather %}
+                <p>Погода в начальной точке: {{ start_weather['status'] }}</p>
+                <p>Температура: {{ start_weather['temp'] }}°C</p>
+                <p>Скорость ветра: {{ start_weather['wind_speed'] }} км/ч</p>
+                <p>Вероятность осадков: {{ start_weather['precipitation'] }}%</p>
+            {% endif %}
+            {% if end_weather %}
+                <p>Погода в конечной точке: {{ end_weather['status'] }}</p>
+                <p>Температура: {{ end_weather['temp'] }}°C</p>
+                <p>Скорость ветра: {{ end_weather['wind_speed'] }} км/ч</p>
+                <p>Вероятность осадков: {{ end_weather['precipitation'] }}%</p>
+            {% endif %}
+        </div>
+
+        <div class="error">
+            {% if error %}
+                <p>{{ error }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Форма для 5-дневного прогноза -->
+    <form id="forecastForm" method="POST" action="/forecast" style="display:none;">
+        <input type="hidden" name="start_city" id="forecast_start_city">
+        <input type="hidden" name="end_city" id="forecast_end_city">
+    </form>
+
+    <script>
+        function submitForecastForm() {
+            // Получаем значения из полей ввода
+            const startCity = document.getElementById('start_city').value;
+            const endCity = document.getElementById('end_city').value;
+
+            // Устанавливаем значения в скрытую форму
+            document.getElementById('forecast_start_city').value = startCity;
+            document.getElementById('forecast_end_city').value = endCity;
+
+            // Отправляем скрытую форму
+            document.getElementById('forecastForm').submit();
+        }
+    </script>
+</body>
+</html>
