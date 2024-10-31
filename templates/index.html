@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Прогноз погоды</title>
+    <title>Weather Forecast</title>
     <style>
         body {
             background-image: url('/static/background.png');
@@ -39,17 +39,19 @@
             border: none;
             background-color: #3498db;
             color: white;
-            font-size: 24px;
+            font-size: 18px;
             cursor: pointer;
             margin-bottom: 10px;
         }
-        .result {
+        .btn-clear {
+            background-color: #e74c3c;
+        }
+        .result, .error {
             margin-top: 20px;
             font-size: 18px;
         }
         .error {
             color: red;
-            font-size: 18px;
         }
     </style>
 </head>
@@ -57,31 +59,45 @@
     <div class="container">
         <form method="POST">
             <div class="input-field">
-                <label for="start_city">Начальная точка</label>
-                <input type="text" id="start_city" name="start_city" placeholder="Введите город" required>
+                <label for="start_city">Starting Point</label>
+                <input type="text" id="start_city" name="start_city" placeholder="Enter city" required>
             </div>
             <div class="input-field">
-                <label for="end_city">Конечная точка</label>
-                <input type="text" id="end_city" name="end_city" placeholder="Введите город" required>
+                <label for="end_city">Ending Point</label>
+                <input type="text" id="end_city" name="end_city" placeholder="Enter city" required>
             </div>
-            <button type="submit" class="btn">Погода сейчас</button>
-            <button type="button" class="btn" onclick="submitForecastForm();">Прогноз погоды</button>
+
+            <div id="additional_cities"></div>
+            <button type="button" class="btn" onclick="addCityField()">Add Point</button>
+            <button type="button" class="btn btn-clear" onclick="clearCityFields()">Clear List</button>
+
+            <button type="submit" class="btn">Current Weather</button>
+            <button type="button" class="btn" onclick="submitForecastForm();">Weather Forecast</button>
         </form>
 
         <div class="result">
             {% if start_weather %}
-                <p>Погода в начальной точке: {{ start_weather['status'] }}</p>
-                <p>Температура: {{ start_weather['temp'] }}°C</p>
-                <p>Скорость ветра: {{ start_weather['wind_speed'] }} км/ч</p>
-                <p>Вероятность осадков: {{ start_weather['precipitation'] }}%</p>
+                <p>Weather at Starting Point: {{ start_weather[0]['WeatherText'] }}</p>
+                <p>Temperature: {{ start_weather[0]['Temperature']['Metric']['Value'] }}°C</p>
+                <p>Wind Speed: {{ start_weather[0]['Wind']['Speed']['Metric']['Value'] }} km/h</p>
+                <p>Precipitation Probability: {{ start_weather[0]['PrecipitationProbability'] }}%</p>
             {% endif %}
             {% if end_weather %}
-                <p>Погода в конечной точке: {{ end_weather['status'] }}</p>
-                <p>Температура: {{ end_weather['temp'] }}°C</p>
-                <p>Скорость ветра: {{ end_weather['wind_speed'] }} км/ч</p>
-                <p>Вероятность осадков: {{ end_weather['precipitation'] }}%</p>
+                <p>Weather at Ending Point: {{ end_weather[0]['WeatherText'] }}</p>
+                <p>Temperature: {{ end_weather[0]['Temperature']['Metric']['Value'] }}°C</p>
+                <p>Wind Speed: {{ end_weather[0]['Wind']['Speed']['Metric']['Value'] }} km/h</p>
+                <p>Precipitation Probability: {{ end_weather[0]['PrecipitationProbability'] }}%</p>
+            {% endif %}
+            {% if additional_weathers %}
+                {% for weather in additional_weathers %}
+                    <p>Weather at Additional Point {{ loop.index }}: {{ weather[0]['WeatherText'] }}</p>
+                    <p>Temperature: {{ weather[0]['Temperature']['Metric']['Value'] }}°C</p>
+                    <p>Wind Speed: {{ weather[0]['Wind']['Speed']['Metric']['Value'] }} km/h</p>
+                    <p>Precipitation Probability: {{ weather[0]['PrecipitationProbability'] }}%</p>
+                {% endfor %}
             {% endif %}
         </div>
+
 
         <div class="error">
             {% if error %}
@@ -90,23 +106,46 @@
         </div>
     </div>
 
-    <!-- Форма для 5-дневного прогноза -->
     <form id="forecastForm" method="POST" action="/forecast" style="display:none;">
         <input type="hidden" name="start_city" id="forecast_start_city">
         <input type="hidden" name="end_city" id="forecast_end_city">
+        <div id="forecast_additional_cities"></div>
     </form>
 
     <script>
+        let cityCount = 0;
+
+        function addCityField() {
+            cityCount++;
+            const cityField = document.createElement('div');
+            cityField.className = 'input-field';
+            cityField.innerHTML = `
+                <label for="additional_city_${cityCount}">Additional Point ${cityCount}</label>
+                <input type="text" id="additional_city_${cityCount}" name="additional_city_${cityCount}" placeholder="Enter city" required>
+            `;
+            document.getElementById('additional_cities').appendChild(cityField);
+        }
+
+        function clearCityFields() {
+            document.getElementById('additional_cities').innerHTML = '';
+            cityCount = 0;
+        }
+
         function submitForecastForm() {
-            // Получаем значения из полей ввода
-            const startCity = document.getElementById('start_city').value;
-            const endCity = document.getElementById('end_city').value;
-
-            // Устанавливаем значения в скрытую форму
-            document.getElementById('forecast_start_city').value = startCity;
-            document.getElementById('forecast_end_city').value = endCity;
-
-            // Отправляем скрытую форму
+            document.getElementById('forecast_start_city').value = document.getElementById('start_city').value;
+            document.getElementById('forecast_end_city').value = document.getElementById('end_city').value;
+            const forecastAdditionalCities = document.getElementById('forecast_additional_cities');
+            forecastAdditionalCities.innerHTML = '';
+            for (let i = 1; i <= cityCount; i++) {
+                const cityInput = document.getElementById(`additional_city_${i}`);
+                if (cityInput) {
+                    const inputHidden = document.createElement('input');
+                    inputHidden.type = 'hidden';
+                    inputHidden.name = `additional_city_${i}`;
+                    inputHidden.value = cityInput.value;
+                    forecastAdditionalCities.appendChild(inputHidden);
+                }
+            }
             document.getElementById('forecastForm').submit();
         }
     </script>
